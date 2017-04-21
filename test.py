@@ -1,5 +1,6 @@
 import CH_data as CH
 import time,traceback,names
+import user_detail as user
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -8,6 +9,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from openpyxl import load_workbook
+
+def checkPageTransition(old,new,msg):
+    if old == new:
+        raise ValueError(msg)
 
 #the list will contain all the values from excel
 input_test_policies = []
@@ -53,7 +58,7 @@ for policy in input_test_policies:
     FIRST_NAME = names.get_first_name()
     LAST_NAME = names.get_last_name()
     
-    curr_url = ''
+    curr_url = 'https://'+user.USERNAME+':'+user.PASSWORD+'@psc-chubb-sit.coverhound.us/'
     first_pass = True
     
     driver = webdriver.PhantomJS()
@@ -63,9 +68,9 @@ for policy in input_test_policies:
     driver.set_window_size(1120, 550)
     try:
         #HOME PAGE
-        driver.get("https://chubb:ChubbCH34@psc-chubb-sit.coverhound.us/")
+        driver.get(curr_url)
         select_state = Select(driver.find_element_by_id('state_abbrev'))
-        select_state.select_by_visible_text(states[policy['state']])
+        select_state.select_by_visible_text(CH.states[policy['state']])
         time.sleep(5)
         select_business_segment = Select(driver.find_element_by_id('business_segment_id'))
         select_business_segment.select_by_visible_text(policy['business_segment'])
@@ -78,8 +83,28 @@ for policy in input_test_policies:
         time.sleep(10)
         #wait = WebDriverWait(driver, 10).until( EC.element_to_be_clickable((By.ID, 'product_codes__bop')))
         print (driver.current_url)
+        checkPageTransition(curr_url,driver.current_url,'Error in Home Page')
         
-        driver.save_screenshot(COMPANY_NAME+ '_home_page_screenshot_1.png')
+        for _type in COVERAGE_ID:
+            driver.execute_script("document.getElementById('"+_type+"').checked = false")
+        
+        driver.save_screenshot(COMPANY_NAME+ '_BusinessInfo_screenshot.png')
+        
+        if driver.current_url == 'https://'+user.USERNAME+':'+user.PASSWORD+'@psc-chubb-sit.coverhound.us/business-info':
+            curr_url = driver.current_url
+            driver.find_element_by_xpath(COVERAGE_XPATH[policy['curr_coverage']]).click()
+            comp_name = driver.find_element_by_id('business_name')
+            comp_name.clear()
+            comp_name.send_keys(COMPANY_NAME)
+            email = driver.find_element_by_id('email')
+            email.clear()
+            email.send_keys((Keys.CONTROL, "a"))
+            email.send_keys(EMAIL)
+            driver.save_screenshot(COMPANY_NAME+ '_business_info_screenshot.png')
+            driver.find_element_by_xpath('//*[@id="commercial-app"]/div/div[2]/div[2]/div/div[2]/form/div[1]/div/div/button').click()
+            print (driver.current_url)
+            time.sleep(10)
+            checkPageTransition(curr_url,driver.current_url,'Error in BusinessInfo')
 
     except Exception as e:
         print (e)
