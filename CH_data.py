@@ -44,3 +44,13 @@ questions = {
 #//*[@id="field_for_CH_324"]/div[1]/div[2]/label
 #//*[@id="field_for_CH_322"]/div[1]/div[1]/label
 
+question_list = {
+    'Do you currently have a Business Owners Policy in effect?':'No',
+    'Have you filed any insurance claims for this business in the past five years?':'No',
+    'Has your Business Owners Policy insurance coverage been cancelled or non-renewed in the past three years for reasons other than nonpayment of premium?':'No',
+    'Do you act as a franchisor?':'No',
+    'Are there functioning and operational smoke/heat detectors in all units and/or occupancies?':'Yes',
+    'Do you sell any products under your name or label?':'No',
+    'Do you hold a current U.S. certificate in your area of expertise?':'Yes'
+    
+}

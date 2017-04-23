@@ -9,6 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from openpyxl import load_workbook
+from bs4 import BeautifulSoup
 
 def checkPageTransition(old,new,msg):
     if old == new:
@@ -16,7 +17,6 @@ def checkPageTransition(old,new,msg):
 
 #the list will contain all the values from excel
 input_test_policies = []
-print (CH.states['AZ'])
 wb = load_workbook('Test-Case.xlsm')
 ws = wb['Sheet1']
 
@@ -35,7 +35,7 @@ for i in range(2,3):
     CH.value_read['city'] = ws['U'+str(i)].value
     CH.value_read['zip_code'] = ws['W'+str(i)].value
     input_test_policies.append(CH.value_read)
-    print (CH.value_read['business_start_date'])
+
     
 #Constants used in the program
 COVERAGE_ID = ['product_codes__general_liability',
@@ -90,7 +90,7 @@ for policy in input_test_policies:
         for _type in COVERAGE_ID:
             driver.execute_script("document.getElementById('"+_type+"').checked = false")
         
-        driver.save_screenshot(COMPANY_NAME+ '_BusinessInfo_screenshot.png')
+        #driver.save_screenshot(COMPANY_NAME+ '_BusinessInfo_screenshot.png')
         
         if driver.current_url == 'https://'+user.USERNAME+':'+user.PASSWORD+'@psc-chubb-sit.coverhound.us/business-info':
             curr_url = driver.current_url
@@ -102,7 +102,7 @@ for policy in input_test_policies:
             email.clear()
             email.send_keys((Keys.CONTROL, "a"))
             email.send_keys(EMAIL)
-            driver.save_screenshot(COMPANY_NAME+ '_business_info_screenshot.png')
+            #driver.save_screenshot(COMPANY_NAME+ '_business_info_screenshot.png')
             driver.find_element_by_xpath('//*[@id="commercial-app"]/div/div[2]/div[2]/div/div[2]/form/div[1]/div/div/button').click()
             print (driver.current_url)
             time.sleep(10)
@@ -128,7 +128,7 @@ for policy in input_test_policies:
             square_footage = driver.find_element_by_id('CH_032')
             square_footage.clear()
             square_footage.send_keys(policy['footage'])
-            driver.save_screenshot(COMPANY_NAME+ '_business_operation_screenshot.png')
+            #driver.save_screenshot(COMPANY_NAME+ '_business_operation_screenshot.png')
             driver.find_element_by_xpath('//*[@id="commercial-app"]/div/div[2]/div[2]/div/div[2]/form/div[1]/div/div/button').click()
             print (driver.current_url)
             time.sleep(10)
@@ -164,7 +164,7 @@ for policy in input_test_policies:
             zip_text.send_keys(policy['zip_code'])
             select_other_address = Select(driver.find_element_by_id('CH_027'))
             select_other_address.select_by_visible_text('No Additional Locations')
-            driver.save_screenshot(COMPANY_NAME+ '_contact_info_screenshot.png')
+            #driver.save_screenshot(COMPANY_NAME+ '_contact_info_screenshot.png')
             driver.find_element_by_xpath('//*[@id="commercial-app"]/div/div[2]/div[2]/div/form/div/div[1]/div/div/button').click()
             print (driver.current_url)
             time.sleep(10)
@@ -173,27 +173,60 @@ for policy in input_test_policies:
         if driver.current_url == 'https://'+user.USERNAME+':'+user.PASSWORD+'@psc-chubb-sit.coverhound.us/coverage-detail/bop':   
             curr_url = driver.current_url
             html =  driver.execute_script("return document.documentElement.outerHTML")
-            print (html)
+            soup = BeautifulSoup(html, 'html.parser')
+            questions_div = soup.find_all("div", class_="question")
+            i = 0
+            for div in questions_div:
+                i += 1
+                label = div.find('label')
+                question = label.text
+                print (question)
+                question_id = label['for']
+                print (question_id)
+                try:
+                    answer = CH.question_list[question]
+                    if answer == 'No':
+                        driver.find_element_by_css_selector("label[for='"+question_id+"_1']").click()
+                        #driver.execute_script("document.getElementById('"+question_id+"_1').checked = true")
+                        print ("document.getElementById('"+question_id+"_1').checked = true")
+                    elif answer == 'Yes':
+                        driver.find_element_by_css_selector("label[for='"+question_id+"_0']").click()
+                        #driver.execute_script("document.getElementById('"+question_id+"_0').checked = true")
+                        print ("document.getElementById('"+question_id+"_0').checked = true")
+                except KeyError:
+                    if question == 'When would you like your coverage to start?':
+                        pass
+                    elif question == 'Does your business provide any of the following services? (Please select all that apply.)':
+                        driver.find_element_by_xpath('//*[@id="field_for_CH_323__1122"]/label').click()
+                
+                driver.save_screenshot(COMPANY_NAME+'_'+str(i)+'_'+question_id+'_coverage_detail_screenshot.png')  
+            
+            print (str(i))
+            driver.save_screenshot(COMPANY_NAME+'_coverage_detail_screenshot.png')  
+            driver.find_element_by_xpath('//*[@id="commercial-app"]/div/div[2]/div[2]/div/form/div/div[1]/div/div/button').click()
+                                          
+            time.sleep(60)
+            checkPageTransition(curr_url,driver.current_url,'Error in Coverage')
             #f = open('html_source.py','w')
             #f.write(html)
             #f.close()
-            if first_pass:
-                driver.find_element_by_xpath('//*[@id="field_for_CH_327"]/div[1]/div[2]/label').click()
-                driver.find_element_by_xpath('//*[@id="field_for_CH_300"]/div[1]/div[2]/label').click()
-                driver.find_element_by_xpath('//*[@id="field_for_CH_301"]/div[1]/div[2]/label').click()
-                driver.find_element_by_xpath('//*[@id="field_for_CH_302"]/div[1]/div[2]/label').click()
-                driver.find_element_by_xpath('//*[@id="field_for_CH_303"]/div[1]/div[1]/label').click()
-                driver.find_element_by_xpath('//*[@id="field_for_CH_304"]/div[1]/div[2]/label').click()
-                if ADDITIONAL_QUESTIONS.count(policy['business_type']) > 0:
-                    driver.find_element_by_xpath('//*[@id="field_for_CH_322"]/div[1]/div[1]/label').click()
-                    driver.find_element_by_xpath('//*[@id="field_for_CH_323__1122"]/label').click()
-                driver.save_screenshot(COMPANY_NAME+'_coverage_detail_screenshot.png')
-                driver.find_element_by_xpath('//*[@id="commercial-app"]/div/div[2]/div[2]/div/form/div/div[1]/div/div/button').click()
-            print (driver.current_url)
-            time.sleep(60)
-            checkPageTransition(curr_url,driver.current_url,'Error in Coverage')
+            # if first_pass:
+            #     driver.find_element_by_xpath('//*[@id="field_for_CH_327"]/div[1]/div[2]/label').click()
+            #     driver.find_element_by_xpath('//*[@id="field_for_CH_300"]/div[1]/div[2]/label').click()
+            #     driver.find_element_by_xpath('//*[@id="field_for_CH_301"]/div[1]/div[2]/label').click()
+            #     driver.find_element_by_xpath('//*[@id="field_for_CH_302"]/div[1]/div[2]/label').click()
+            #     driver.find_element_by_xpath('//*[@id="field_for_CH_303"]/div[1]/div[1]/label').click()
+            #     driver.find_element_by_xpath('//*[@id="field_for_CH_304"]/div[1]/div[2]/label').click()
+            #     if ADDITIONAL_QUESTIONS.count(policy['business_type']) > 0:
+            #         driver.find_element_by_xpath('//*[@id="field_for_CH_322"]/div[1]/div[1]/label').click()
+            #         driver.find_element_by_xpath('//*[@id="field_for_CH_323__1122"]/label').click()
+            #     driver.save_screenshot(COMPANY_NAME+'_coverage_detail_screenshot.png')
+            #     driver.find_element_by_xpath('//*[@id="commercial-app"]/div/div[2]/div[2]/div/form/div/div[1]/div/div/button').click()
+            # print (driver.current_url)
+            # time.sleep(60)
+            # checkPageTransition(curr_url,driver.current_url,'Error in Coverage')
         
-        driver.save_screenshot(COMPANY_NAME+'_success_screenshot.png')
+        #driver.save_screenshot(COMPANY_NAME+'_success_screenshot.png')
         
     except Exception as e:
         print (e)
