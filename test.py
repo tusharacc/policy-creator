@@ -35,6 +35,7 @@ for i in range(2,3):
     CH.value_read['city'] = ws['U'+str(i)].value
     CH.value_read['zip_code'] = ws['W'+str(i)].value
     input_test_policies.append(CH.value_read)
+    print (CH.value_read['business_start_date'])
     
 #Constants used in the program
 COVERAGE_ID = ['product_codes__general_liability',
@@ -69,6 +70,7 @@ for policy in input_test_policies:
     try:
         #HOME PAGE
         driver.get(curr_url)
+        driver.execute_script('window.localStorage.clear();')
         select_state = Select(driver.find_element_by_id('state_abbrev'))
         select_state.select_by_visible_text(CH.states[policy['state']])
         time.sleep(5)
@@ -105,11 +107,98 @@ for policy in input_test_policies:
             print (driver.current_url)
             time.sleep(10)
             checkPageTransition(curr_url,driver.current_url,'Error in BusinessInfo')
-
+            
+        #BUSINESS OPERATION
+        if driver.current_url == 'https://'+user.USERNAME+':'+user.PASSWORD+'@psc-chubb-sit.coverhound.us/business-operations':
+            curr_url = driver.current_url
+            select_business_structure = Select(driver.find_element_by_xpath('//*[@id="CH_024"]'))
+            select_business_structure.select_by_visible_text(policy['business_ownership'])
+            driver.find_element_by_id('CH_105').send_keys('04/04/2016')
+            if first_pass:
+                driver.find_element_by_xpath('//*[@id="field_for_CH_026"]/div[1]/div[2]/label').click()
+            number_of_employees = driver.find_element_by_id('CH_029')
+            number_of_employees.clear()
+            number_of_employees.send_keys(policy['employees_count'])
+            payroll = driver.find_element_by_id('CH_030')
+            payroll.clear()
+            payroll.send_keys(policy['annual_payroll'])
+            projected_sales = driver.find_element_by_id('CH_031')
+            projected_sales.clear()
+            projected_sales.send_keys(policy['annual_gross_sales'])
+            square_footage = driver.find_element_by_id('CH_032')
+            square_footage.clear()
+            square_footage.send_keys(policy['footage'])
+            driver.save_screenshot(COMPANY_NAME+ '_business_operation_screenshot.png')
+            driver.find_element_by_xpath('//*[@id="commercial-app"]/div/div[2]/div[2]/div/div[2]/form/div[1]/div/div/button').click()
+            print (driver.current_url)
+            time.sleep(10)
+            checkPageTransition(curr_url,driver.current_url,'Error in BusinessOp')
+            
+        if driver.current_url == 'https://'+user.USERNAME+':'+user.PASSWORD+'@psc-chubb-sit.coverhound.us/contact':
+            curr_url = driver.current_url
+            select_title = Select(driver.find_element_by_id('title'))
+            select_title.select_by_visible_text('Dr.')
+            f_name = driver.find_element_by_id('first_name')
+            f_name.clear()
+            f_name.send_keys(FIRST_NAME)
+            l_name = driver.find_element_by_id('last_name')
+            l_name.clear()
+            l_name.send_keys(LAST_NAME)
+            ph_num = driver.find_element_by_id('telephone')
+            ph_num.clear()
+            ph_num.send_keys('8888888888')
+            time.sleep(1)
+            confirm_email = driver.find_element_by_id('email').get_attribute('value').encode('utf-8')
+            address = driver.find_element_by_xpath('//*[@id="field_for_CH_020"]/div[1]/div[1]/input')
+            address.clear()
+            address.send_keys(policy['address_line'])
+            time.sleep(1)
+            city_text = driver.find_element_by_id('CH_037')
+            city_text.clear()
+            city_text.send_keys(policy['city'])
+            time.sleep(1)
+            select_insured_state = Select(driver.find_element_by_id('CH_018'))
+            select_insured_state.select_by_visible_text(policy['state'])
+            zip_text = driver.find_element_by_id('CH_038')
+            zip_text.clear()
+            zip_text.send_keys(policy['zip_code'])
+            select_other_address = Select(driver.find_element_by_id('CH_027'))
+            select_other_address.select_by_visible_text('No Additional Locations')
+            driver.save_screenshot(COMPANY_NAME+ '_contact_info_screenshot.png')
+            driver.find_element_by_xpath('//*[@id="commercial-app"]/div/div[2]/div[2]/div/form/div/div[1]/div/div/button').click()
+            print (driver.current_url)
+            time.sleep(10)
+            checkPageTransition(curr_url,driver.current_url,'Error in ContactInfo')
+            
+        if driver.current_url == 'https://'+user.USERNAME+':'+user.PASSWORD+'@psc-chubb-sit.coverhound.us/coverage-detail/bop':   
+            curr_url = driver.current_url
+            html =  driver.execute_script("return document.documentElement.outerHTML")
+            print (html)
+            #f = open('html_source.py','w')
+            #f.write(html)
+            #f.close()
+            if first_pass:
+                driver.find_element_by_xpath('//*[@id="field_for_CH_327"]/div[1]/div[2]/label').click()
+                driver.find_element_by_xpath('//*[@id="field_for_CH_300"]/div[1]/div[2]/label').click()
+                driver.find_element_by_xpath('//*[@id="field_for_CH_301"]/div[1]/div[2]/label').click()
+                driver.find_element_by_xpath('//*[@id="field_for_CH_302"]/div[1]/div[2]/label').click()
+                driver.find_element_by_xpath('//*[@id="field_for_CH_303"]/div[1]/div[1]/label').click()
+                driver.find_element_by_xpath('//*[@id="field_for_CH_304"]/div[1]/div[2]/label').click()
+                if ADDITIONAL_QUESTIONS.count(policy['business_type']) > 0:
+                    driver.find_element_by_xpath('//*[@id="field_for_CH_322"]/div[1]/div[1]/label').click()
+                    driver.find_element_by_xpath('//*[@id="field_for_CH_323__1122"]/label').click()
+                driver.save_screenshot(COMPANY_NAME+'_coverage_detail_screenshot.png')
+                driver.find_element_by_xpath('//*[@id="commercial-app"]/div/div[2]/div[2]/div/form/div/div[1]/div/div/button').click()
+            print (driver.current_url)
+            time.sleep(60)
+            checkPageTransition(curr_url,driver.current_url,'Error in Coverage')
+        
+        driver.save_screenshot(COMPANY_NAME+'_success_screenshot.png')
+        
     except Exception as e:
         print (e)
         print (driver.current_url)
-        driver.save_screenshot('error_screenshot.png')
+        driver.save_screenshot(COMPANY_NAME +'_error_screenshot.png')
         traceback.print_exc()
     finally:
         driver.quit()

@@ -40,3 +40,7 @@ questions = {
         'q5':['//*[@id="field_for_CH_303"]/div[1]/div[1]/label','//*[@id="field_for_CH_303"]/div[1]/div[2]/label'],
         'q6':['//*[@id="field_for_CH_304"]/div[1]/div[1]/label','//*[@id="field_for_CH_304"]/div[1]/div[2]/label']
 }
+
+#//*[@id="field_for_CH_324"]/div[1]/div[2]/label
+#//*[@id="field_for_CH_322"]/div[1]/div[1]/label
+
