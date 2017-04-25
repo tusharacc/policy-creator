@@ -45,12 +45,36 @@ questions = {
 #//*[@id="field_for_CH_322"]/div[1]/div[1]/label
 
 question_list = {
-    'Do you currently have a Business Owners Policy in effect?':'No',
-    'Have you filed any insurance claims for this business in the past five years?':'No',
-    'Has your Business Owners Policy insurance coverage been cancelled or non-renewed in the past three years for reasons other than nonpayment of premium?':'No',
-    'Do you act as a franchisor?':'No',
-    'Are there functioning and operational smoke/heat detectors in all units and/or occupancies?':'Yes',
-    'Do you sell any products under your name or label?':'No',
-    'Do you hold a current U.S. certificate in your area of expertise?':'Yes'
+    'Do you currently have a Business Owners Policy in effect?':['P','No'],
+    'Have you filed any insurance claims for this business in the past five years?':['P','No'],
+    'Has your Business Owners Policy insurance coverage been cancelled or non-renewed in the past three years for reasons other than nonpayment of premium?':['P','No'],
+    'Do you act as a franchisor?':['P','No'],
+    'Are there functioning and operational smoke/heat detectors in all units and/or occupancies?':['P','Yes'],
+    'Do you sell any products under your name or label?':['P','No'],
+    'Do you hold a current U.S. certificate in your area of expertise?':['C','Yes'],
+    'Do you provide any physical rehabilitation services?':['C','No'],
+    'Do you perform any procedures under anesthesia on premises?':['C','No'],
+    'Do you provide any property management services?':['C','No'],
+    'Do you organize or host guided tours?':['C','No'],
+    'Do you primarily specialize in international travel?':['C','No'],
+    'Do you manufacture any industrial artwork or metalwork?':['C','No'],
+    'Do you sell any products besides artwork for display?':['C','No'],
+    'Do you and all employees or independent contractors hold valid licenses?':['C','Yes'],
+    'Do you provide massage or tanning services?':['C','No'],
+    'Do you provide nail services (e.g. manicure or pedicure)?':['C','No'],
+    'Do you use any commercial cooking equipment (e.g. deep fat fryer)?':['C','No'],
+    'Do you own a farm or growing operation?':['C','No'],
+    'Do you sell any alcohol or tobacco?':['C','No'],
+    'Do you rent or loan bicycles?':['C','No'],
+    'Do you sell any used, refurbished, or pre-owned items?':['C','No'],
+    'Are your cleaning services limited to residential locations only?':['C','Yes'],
+    'Do you provide any handyperson services?':['C','No'],
+    'Do you provide any instruction or services specific to the following: acupuncture, aerial yoga, boxing, bungee jumping, cheerleading, equestrian yoga, esthetician, extreme sports, free running, health care provider, martial arts or weapons training, massage therapy, naturopath, nutritionists, osteopaths, parkour instruction, physical therapy, pole dancing, SCUBA, trapeze, wilderness hiking, or wrestling?':['C','No'],
+    'Do you offer aerial photography or videography services?':['C','No'],
+    'Do you perform any film shoots or production services?':['C','No'],
+    'Hired and non-owned auto coverage - ask the following: -  Do you own any vehicles in the name of the business?':['C','No'],
+    'Hired and non-owned auto coverage - ask the following: -  Do any employees or owners use their personal car for business use more than 12 times per year?':['C','No'],
+    'Hired and non-owned auto coverage - ask the following:-  Do you provide delivery services?':['C','No'],
+    'Have you been involved in or do you plan to be involved in any layoffs, mergers, or acquisitions in the past five years or next two years?':['C','No']
     
 }

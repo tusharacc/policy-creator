@@ -15,12 +15,24 @@ def checkPageTransition(old,new,msg):
     if old == new:
         raise ValueError(msg)
 
+def flipTheValue(orig,ind,question_level):
+    
+    if question_level == 'P':
+        return orig
+    else:
+        if ind == 'N':
+            return int(not bool(orig))
+        else:
+            return orig
+            
+test_condition = input("Type N for negative scenario and P for positive scenario :  ").upper()
+
 #the list will contain all the values from excel
 input_test_policies = []
 wb = load_workbook('Test-Case.xlsm')
 ws = wb['Sheet1']
 
-for i in range(2,3):
+for i in range(2,4):
     CH.value_read['state'] = ws['A'+str(i)].value
     CH.value_read['business_segment'] = ws['B'+str(i)].value
     CH.value_read['business_type'] = ws['C'+str(i)].value
@@ -56,6 +68,7 @@ ADDITIONAL_QUESTIONS = ['Personal Training (Health And Fitness)']
 
 for policy in input_test_policies:
     COMPANY_NAME = names.get_full_name()
+    print (COMPANY_NAME)
     FIRST_NAME = names.get_first_name()
     LAST_NAME = names.get_last_name()
     
@@ -102,7 +115,7 @@ for policy in input_test_policies:
             email.clear()
             email.send_keys((Keys.CONTROL, "a"))
             email.send_keys(EMAIL)
-            #driver.save_screenshot(COMPANY_NAME+ '_business_info_screenshot.png')
+            driver.save_screenshot(COMPANY_NAME+ '_business_info_screenshot.png')
             driver.find_element_by_xpath('//*[@id="commercial-app"]/div/div[2]/div[2]/div/div[2]/form/div[1]/div/div/button').click()
             print (driver.current_url)
             time.sleep(10)
@@ -128,7 +141,7 @@ for policy in input_test_policies:
             square_footage = driver.find_element_by_id('CH_032')
             square_footage.clear()
             square_footage.send_keys(policy['footage'])
-            #driver.save_screenshot(COMPANY_NAME+ '_business_operation_screenshot.png')
+            driver.save_screenshot(COMPANY_NAME+ '_business_operation_screenshot.png')
             driver.find_element_by_xpath('//*[@id="commercial-app"]/div/div[2]/div[2]/div/div[2]/form/div[1]/div/div/button').click()
             print (driver.current_url)
             time.sleep(10)
@@ -164,7 +177,7 @@ for policy in input_test_policies:
             zip_text.send_keys(policy['zip_code'])
             select_other_address = Select(driver.find_element_by_id('CH_027'))
             select_other_address.select_by_visible_text('No Additional Locations')
-            #driver.save_screenshot(COMPANY_NAME+ '_contact_info_screenshot.png')
+            driver.save_screenshot(COMPANY_NAME+ '_contact_info_screenshot.png')
             driver.find_element_by_xpath('//*[@id="commercial-app"]/div/div[2]/div[2]/div/form/div/div[1]/div/div/button').click()
             print (driver.current_url)
             time.sleep(10)
@@ -184,22 +197,22 @@ for policy in input_test_policies:
                 question_id = label['for']
                 print (question_id)
                 try:
-                    answer = CH.question_list[question]
+                    question_level,answer = CH.question_list[question]
                     if answer == 'No':
-                        driver.find_element_by_css_selector("label[for='"+question_id+"_1']").click()
+                        driver.find_element_by_css_selector("label[for='"+question_id+"_"+str(flipTheValue(1,test_condition,question_level))+"']").click()
                         #driver.execute_script("document.getElementById('"+question_id+"_1').checked = true")
-                        print ("document.getElementById('"+question_id+"_1').checked = true")
+                        #print ("document.getElementById('"+question_id+"_"+str(flipTheValue(1,test_condition,question_level))+"').checked = true")
                     elif answer == 'Yes':
-                        driver.find_element_by_css_selector("label[for='"+question_id+"_0']").click()
+                        driver.find_element_by_css_selector("label[for='"+question_id+"_"+str(flipTheValue(0,test_condition,question_level))+"']").click()
                         #driver.execute_script("document.getElementById('"+question_id+"_0').checked = true")
-                        print ("document.getElementById('"+question_id+"_0').checked = true")
+                        #print ("document.getElementById('"+question_id+"_"+str(flipTheValue(0,test_condition,question_level))+"').checked = true")
                 except KeyError:
                     if question == 'When would you like your coverage to start?':
                         pass
                     elif question == 'Does your business provide any of the following services? (Please select all that apply.)':
                         driver.find_element_by_xpath('//*[@id="field_for_CH_323__1122"]/label').click()
                 
-                driver.save_screenshot(COMPANY_NAME+'_'+str(i)+'_'+question_id+'_coverage_detail_screenshot.png')  
+                #driver.save_screenshot(COMPANY_NAME+'_'+str(i)+'_'+question_id+'_coverage_detail_screenshot.png')  
             
             print (str(i))
             driver.save_screenshot(COMPANY_NAME+'_coverage_detail_screenshot.png')  
@@ -226,7 +239,7 @@ for policy in input_test_policies:
             # time.sleep(60)
             # checkPageTransition(curr_url,driver.current_url,'Error in Coverage')
         
-        #driver.save_screenshot(COMPANY_NAME+'_success_screenshot.png')
+        driver.save_screenshot(COMPANY_NAME+'_success_screenshot.png')
         
     except Exception as e:
         print (e)
