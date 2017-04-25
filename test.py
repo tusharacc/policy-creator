@@ -46,9 +46,11 @@ for i in range(2,4):
     CH.value_read['address_line'] = ws['S'+str(i)].value
     CH.value_read['city'] = ws['U'+str(i)].value
     CH.value_read['zip_code'] = ws['W'+str(i)].value
-    input_test_policies.append(CH.value_read)
+    #print (CH.value_read)
+    input_test_policies.append(dict(CH.value_read))
+    #print (input_test_policies)
 
-    
+print (input_test_policies)    
 #Constants used in the program
 COVERAGE_ID = ['product_codes__general_liability',
                'product_codes__professional_liability',
@@ -193,17 +195,18 @@ for policy in input_test_policies:
                 i += 1
                 label = div.find('label')
                 question = label.text
-                print (question)
                 question_id = label['for']
-                print (question_id)
+                print (question)
                 try:
                     question_level,answer = CH.question_list[question]
                     if answer == 'No':
                         driver.find_element_by_css_selector("label[for='"+question_id+"_"+str(flipTheValue(1,test_condition,question_level))+"']").click()
+                        print ("label[for='"+question_id+"_"+str(flipTheValue(1,test_condition,question_level))+"']")
                         #driver.execute_script("document.getElementById('"+question_id+"_1').checked = true")
                         #print ("document.getElementById('"+question_id+"_"+str(flipTheValue(1,test_condition,question_level))+"').checked = true")
                     elif answer == 'Yes':
                         driver.find_element_by_css_selector("label[for='"+question_id+"_"+str(flipTheValue(0,test_condition,question_level))+"']").click()
+                        print ("label[for='"+question_id+"_"+str(flipTheValue(0,test_condition,question_level))+"']")
                         #driver.execute_script("document.getElementById('"+question_id+"_0').checked = true")
                         #print ("document.getElementById('"+question_id+"_"+str(flipTheValue(0,test_condition,question_level))+"').checked = true")
                 except KeyError:
@@ -214,7 +217,7 @@ for policy in input_test_policies:
                 
                 #driver.save_screenshot(COMPANY_NAME+'_'+str(i)+'_'+question_id+'_coverage_detail_screenshot.png')  
             
-            print (str(i))
+            time.sleep(2)
             driver.save_screenshot(COMPANY_NAME+'_coverage_detail_screenshot.png')  
             driver.find_element_by_xpath('//*[@id="commercial-app"]/div/div[2]/div[2]/div/form/div/div[1]/div/div/button').click()
                                           
@@ -247,4 +250,5 @@ for policy in input_test_policies:
         driver.save_screenshot(COMPANY_NAME +'_error_screenshot.png')
         traceback.print_exc()
     finally:
+        driver.close()
         driver.quit()
