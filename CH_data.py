@@ -49,7 +49,7 @@ question_list = {
     'Have you filed any insurance claims for this business in the past five years?':['P','No'],
     'Has your Business Owners Policy insurance coverage been cancelled or non-renewed in the past three years for reasons other than nonpayment of premium?':['P','No'],
     'Do you act as a franchisor?':['P','No'],
-    'Are there functioning and operational smoke/heat detectors in all units and/or occupancies?':['P','Yes'],
+    'Does your primary location have functioning and operational smoke/heat detectors?':['P','Yes'],
     'Do you sell any products under your name or label?':['P','No'],
     'Do you hold a current U.S. certificate in your area of expertise?':['C','Yes'],
     'Do you provide any physical rehabilitation services?':['C','No'],

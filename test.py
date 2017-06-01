@@ -1,6 +1,7 @@
 import CH_data as CH
 import time,traceback,names
 import user_detail as user
+import selenium.common.exceptions
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -32,7 +33,7 @@ input_test_policies = []
 wb = load_workbook('Test-Case.xlsm')
 ws = wb['Sheet1']
 
-for i in range(2,4):
+for i in range(2,3):
     CH.value_read['state'] = ws['A'+str(i)].value
     CH.value_read['business_segment'] = ws['B'+str(i)].value
     CH.value_read['business_type'] = ws['C'+str(i)].value
@@ -50,7 +51,7 @@ for i in range(2,4):
     input_test_policies.append(dict(CH.value_read))
     #print (input_test_policies)
 
-print (input_test_policies)    
+#print (input_test_policies)    
 #Constants used in the program
 COVERAGE_ID = ['product_codes__general_liability',
                'product_codes__professional_liability',
@@ -74,7 +75,7 @@ for policy in input_test_policies:
     FIRST_NAME = names.get_first_name()
     LAST_NAME = names.get_last_name()
     
-    curr_url = 'https://'+user.USERNAME+':'+user.PASSWORD+'@psc-chubb-sit.coverhound.us/'
+    curr_url = 'https://'+user.USERNAME+':'+user.PASSWORD+'@psc-chubb-sit.coverhound.us/business-insurance'
     first_pass = True
     
     driver = webdriver.PhantomJS()
@@ -96,10 +97,10 @@ for policy in input_test_policies:
         select_business_type.select_by_visible_text(policy['business_type'])
         
         driver.save_screenshot(COMPANY_NAME+ '_home_page_screenshot.png')
-        driver.find_element_by_xpath('//*[@id="chubb_commercial_entry_form"]/div/button').click()
+        driver.find_element_by_xpath('//*[@id="cm-quote-form"]/div[1]/button').click()
         time.sleep(10)
         #wait = WebDriverWait(driver, 10).until( EC.element_to_be_clickable((By.ID, 'product_codes__bop')))
-        print (driver.current_url)
+        #print (driver.current_url)
         checkPageTransition(curr_url,driver.current_url,'Error in Home Page')
         
         for _type in COVERAGE_ID:
@@ -107,7 +108,7 @@ for policy in input_test_policies:
         
         #driver.save_screenshot(COMPANY_NAME+ '_BusinessInfo_screenshot.png')
         
-        if driver.current_url == 'https://'+user.USERNAME+':'+user.PASSWORD+'@psc-chubb-sit.coverhound.us/business-info':
+        if driver.current_url == 'https://'+user.USERNAME+':'+user.PASSWORD+'@psc-chubb-sit.coverhound.us/business-insurance/business-info':
             curr_url = driver.current_url
             driver.find_element_by_xpath(COVERAGE_XPATH[policy['curr_coverage']]).click()
             comp_name = driver.find_element_by_id('business_name')
@@ -119,12 +120,12 @@ for policy in input_test_policies:
             email.send_keys(EMAIL)
             driver.save_screenshot(COMPANY_NAME+ '_business_info_screenshot.png')
             driver.find_element_by_xpath('//*[@id="commercial-app"]/div/div[2]/div[2]/div/div[2]/form/div[1]/div/div/button').click()
-            print (driver.current_url)
+            #print (driver.current_url)
             time.sleep(10)
             checkPageTransition(curr_url,driver.current_url,'Error in BusinessInfo')
             
         #BUSINESS OPERATION
-        if driver.current_url == 'https://'+user.USERNAME+':'+user.PASSWORD+'@psc-chubb-sit.coverhound.us/business-operations':
+        if driver.current_url == 'https://'+user.USERNAME+':'+user.PASSWORD+'@psc-chubb-sit.coverhound.us/business-insurance/business-operations':
             curr_url = driver.current_url
             select_business_structure = Select(driver.find_element_by_xpath('//*[@id="CH_024"]'))
             select_business_structure.select_by_visible_text(policy['business_ownership'])
@@ -145,11 +146,11 @@ for policy in input_test_policies:
             square_footage.send_keys(policy['footage'])
             driver.save_screenshot(COMPANY_NAME+ '_business_operation_screenshot.png')
             driver.find_element_by_xpath('//*[@id="commercial-app"]/div/div[2]/div[2]/div/div[2]/form/div[1]/div/div/button').click()
-            print (driver.current_url)
+            #print (driver.current_url)
             time.sleep(10)
             checkPageTransition(curr_url,driver.current_url,'Error in BusinessOp')
             
-        if driver.current_url == 'https://'+user.USERNAME+':'+user.PASSWORD+'@psc-chubb-sit.coverhound.us/contact':
+        if driver.current_url == 'https://'+user.USERNAME+':'+user.PASSWORD+'@psc-chubb-sit.coverhound.us/business-insurance/contact':
             curr_url = driver.current_url
             select_title = Select(driver.find_element_by_id('title'))
             select_title.select_by_visible_text('Dr.')
@@ -181,11 +182,11 @@ for policy in input_test_policies:
             select_other_address.select_by_visible_text('No Additional Locations')
             driver.save_screenshot(COMPANY_NAME+ '_contact_info_screenshot.png')
             driver.find_element_by_xpath('//*[@id="commercial-app"]/div/div[2]/div[2]/div/form/div/div[1]/div/div/button').click()
-            print (driver.current_url)
+            #print (driver.current_url)
             time.sleep(10)
             checkPageTransition(curr_url,driver.current_url,'Error in ContactInfo')
             
-        if driver.current_url == 'https://'+user.USERNAME+':'+user.PASSWORD+'@psc-chubb-sit.coverhound.us/coverage-detail/bop':   
+        if driver.current_url == 'https://'+user.USERNAME+':'+user.PASSWORD+'@psc-chubb-sit.coverhound.us/business-insurance/coverage-detail/bop':   
             curr_url = driver.current_url
             html =  driver.execute_script("return document.documentElement.outerHTML")
             soup = BeautifulSoup(html, 'html.parser')
@@ -196,17 +197,18 @@ for policy in input_test_policies:
                 label = div.find('label')
                 question = label.text
                 question_id = label['for']
-                print (question)
+                #print (question)
                 try:
                     question_level,answer = CH.question_list[question]
+                    #print (question_level + answer)
                     if answer == 'No':
                         driver.find_element_by_css_selector("label[for='"+question_id+"_"+str(flipTheValue(1,test_condition,question_level))+"']").click()
-                        print ("label[for='"+question_id+"_"+str(flipTheValue(1,test_condition,question_level))+"']")
+                        #print ("label[for='"+question_id+"_"+str(flipTheValue(1,test_condition,question_level))+"']")
                         #driver.execute_script("document.getElementById('"+question_id+"_1').checked = true")
                         #print ("document.getElementById('"+question_id+"_"+str(flipTheValue(1,test_condition,question_level))+"').checked = true")
                     elif answer == 'Yes':
                         driver.find_element_by_css_selector("label[for='"+question_id+"_"+str(flipTheValue(0,test_condition,question_level))+"']").click()
-                        print ("label[for='"+question_id+"_"+str(flipTheValue(0,test_condition,question_level))+"']")
+                        #print ("label[for='"+question_id+"_"+str(flipTheValue(0,test_condition,question_level))+"']")
                         #driver.execute_script("document.getElementById('"+question_id+"_0').checked = true")
                         #print ("document.getElementById('"+question_id+"_"+str(flipTheValue(0,test_condition,question_level))+"').checked = true")
                 except KeyError:
@@ -214,6 +216,8 @@ for policy in input_test_policies:
                         pass
                     elif question == 'Does your business provide any of the following services? (Please select all that apply.)':
                         driver.find_element_by_xpath('//*[@id="field_for_CH_323__1122"]/label').click()
+                    # else:
+                    #     driver.find_element_by_css_selector("label[for='"+question_id+"_1']").click()
                 
                 #driver.save_screenshot(COMPANY_NAME+'_'+str(i)+'_'+question_id+'_coverage_detail_screenshot.png')  
             
@@ -223,9 +227,44 @@ for policy in input_test_policies:
                                           
             time.sleep(60)
             checkPageTransition(curr_url,driver.current_url,'Error in Coverage')
+            
+            no_quote=  None
+            quote = None
+            try:
+                no_quote = driver.find_element_by_class_name( "cm-no-quotes-yellow-light")
+                quote = driver.find_element_by_class_name( "cm-product-quotes")
+            except selenium.common.exceptions.NoSuchElementException:
+                if no_quote == None:
+                    driver.find_element_by_xpath('//*[@id="commercial-app"]/div/div[2]/div[2]/div/form/div/div[1]/div/div/div/div[2]/div[1]/div[2]/div[1]/a/span').click()
+                    time.sleep(2)
+                    driver.find_element_by_xpath('//*[@id="commercial-app"]/div/div[2]/div[2]/div/form/div/div[1]/div/div/button/span').click()
+                    time.sleep(10)
+                    driver.find_element_by_xpath('//*[@id="commercial-app"]/div/div[2]/div[2]/div/div[2]/div/div/div[4]/div/a/span/span').click()
+                    time.sleep(10)
+                    #driver.find_element_by_class_name('cm-application-summary-acknowledgement-condition-checkbox').click()
+                    driver.find_element_by_id('confirmation_name').send_keys(FIRST_NAME+' '+LAST_NAME)
+                    driver.find_element_by_xpath(' //*[@id="commercial-app"]/div/div[2]/div[2]/div/div[2]/div/div/div[5]/form/div[2]/div/button/span/span').click()
+                    time.sleep(10)               
+                    select_insured_state_checkout_page = Select(driver.find_element_by_id('address_state'))
+                    select_insured_state_checkout_page.select_by_visible_text(policy['state'])
+                    #driver.execute_script("document.getElementByName('cardnumber')[0].value = 5555 5555 5555 4444")
+                    driver.switch_to.frame(driver.find_element_by_name('__privateStripeFrame4'))
+                    driver.find_element_by_name('cardnumber').send_keys(5555)
+                    #card_number = driver.find_elements_by_css_selector("#cardNumber div.__PrivateStripeElement input.__PrivateStripeElement-input")
+                    # print (card_number)
+                    # card_number[0].click()
+                    # card_number[0].send_keys('5555')
+                    #driver.find_element_by_xpath("//input[@name='cardnumber']").send_keys('5555555555554444')
+                    #driver.find_element_by_xpath('//*[@id="root"]/form/span/label/input').send_keys('04/19')
+                    #driver.find_element_by_xpath('//*[@id="root"]/form/span/label/input').send_keys('678')
+                    #driver.find_element_by_xpath('//*[@id="commercial-app"]/div/div[2]/div[2]/div/div[2]/div/div/section[2]/form/div[6]/button').click()
+                    #time.sleep(30)
+                    #policy_num = driver.find_element_by_xpath('//*[@id="commercial-app"]/div/div[2]/div[2]/div/div[2]/div/div/div[2]/ul/li/div/div/p[1]/span[2]').getText()
+                    driver.save_screenshot(COMPANY_NAME+'_policy_num.png') 
+                    #print (policy_num)
             #f = open('html_source.py','w')
             #f.write(html)
-            #f.close()
+            #f.close()//*[@id="root"]/form/span/label/input
             # if first_pass:
             #     driver.find_element_by_xpath('//*[@id="field_for_CH_327"]/div[1]/div[2]/label').click()
             #     driver.find_element_by_xpath('//*[@id="field_for_CH_300"]/div[1]/div[2]/label').click()
