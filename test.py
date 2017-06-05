@@ -2,6 +2,7 @@ import CH_data as CH
 import time,traceback,names
 import user_detail as user
 import selenium.common.exceptions
+from splinter import Browser
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -77,7 +78,7 @@ for policy in input_test_policies:
     
     curr_url = 'https://'+user.USERNAME+':'+user.PASSWORD+'@psc-chubb-sit.coverhound.us/business-insurance'
     first_pass = True
-    
+    browser = Browser('phantomjs')
     driver = webdriver.PhantomJS()
     driver.delete_all_cookies()
     driver.start_session(DesiredCapabilities.PHANTOMJS)
@@ -87,17 +88,19 @@ for policy in input_test_policies:
         #HOME PAGE
         driver.get(curr_url)
         driver.execute_script('window.localStorage.clear();')
-        select_state = Select(driver.find_element_by_id('state_abbrev'))
-        select_state.select_by_visible_text(CH.states[policy['state']])
+        driver.find_element_by_xpath('//*[@id="cm-quote-form"]/div[1]/div[1]/div[1]/div[1]/input').send_keys(CH.states[policy['state']])
+        # select_state = Select(driver.find_element_by_id('state_abbrev'))
+        # select_state.select_by_visible_text(CH.states[policy['state']])
         time.sleep(5)
-        select_business_segment = Select(driver.find_element_by_id('business_segment_id'))
-        select_business_segment.select_by_visible_text(policy['business_segment'])
-        time.sleep(5)
-        select_business_type = Select(driver.find_element_by_id('business_type_id'))
-        select_business_type.select_by_visible_text(policy['business_type'])
+        driver.find_element_by_xpath('//*[@id="cm-quote-form"]/div[1]/div[2]/div[1]/div[1]/input').send_keys(policy['business_type'])
+        # select_business_segment = Select(driver.find_element_by_id('business_segment_id'))
+        # select_business_segment.select_by_visible_text(policy['business_segment'])
+        # time.sleep(5)
+        # select_business_type = Select(driver.find_element_by_id('business_type_id'))
+        # select_business_type.select_by_visible_text(policy['business_type'])
         
         driver.save_screenshot(COMPANY_NAME+ '_home_page_screenshot.png')
-        driver.find_element_by_xpath('//*[@id="cm-quote-form"]/div[1]/button').click()
+        driver.find_element_by_xpath('//*[@id="cm-quote-form"]/div[1]/button/span/span').click()
         time.sleep(10)
         #wait = WebDriverWait(driver, 10).until( EC.element_to_be_clickable((By.ID, 'product_codes__bop')))
         #print (driver.current_url)
